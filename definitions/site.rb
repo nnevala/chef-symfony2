@@ -1,7 +1,7 @@
 
 define :symfony2_site,
-  :capistrano_owner => "deploy",
-  :capistrano_group => "deploy",
+  :deploy_owner => "deploy",
+  :deploy_group => "deploy",
   :site_owner => "ubuntu",
   :site_group => "ubuntu" do
 
@@ -23,8 +23,8 @@ define :symfony2_site,
     "#{base_path}/shared/app/logs",
     "#{base_path}/shared/app/cache" ].each do |path|
     directory path do
-      owner params[:capistrano_owner]
-      group params[:capistrano_group]
+      owner params[:deploy_owner]
+      group params[:deploy_group]
       mode "0775"
       action :create
       recursive true
