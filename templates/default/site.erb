@@ -1,0 +1,53 @@
+
+server {
+  listen 80;
+  server_name <%= @server_name %>;
+
+  access_log <%= node['nginx']['log_dir'] %>/<%= @server_name %>.access.log;
+  error_log <%= node['nginx']['log_dir'] %>/<%= @server_name %>.error.log;
+
+  rewrite ^/app\.php/?(.*)$ /$1 permanent;
+
+  root <%= node['nginx']['sites_dir'] %>/<%= @document_root %>;
+
+  location / {
+    index app.php;
+    try_files $uri @rewriteindex;
+  }
+
+  location @rewriteindex {
+      rewrite ^(.*)$ /app.php/$1 last;
+  }
+
+  location ~ "^(.+\.php)($|/)" {
+    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+
+    fastcgi_param HTTPS off;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+    fastcgi_param PATH_INFO $fastcgi_path_info;
+    <% @fastcgi_params.each do |name, value| -%>
+    fastcgi_param <%= name %> <%= value %>;
+    <% end -%>
+
+    fastcgi_pass unix:/var/run/php5-fpm.sock;
+
+    include fastcgi_params;
+  }
+
+  # deny access to .htaccess files, if Apache's document root
+  # concurs with nginx's one
+  #
+  location ~ /\.ht {
+    deny all;
+  }
+}
+
+<% @alternate_domains.each do |domain| -%>
+server {
+  listen 80;
+  server_name <%= domain %>;
+  rewrite ^ http://<%= @server_name %>$request_uri? permanent;
+}
+
+<% end -%>
