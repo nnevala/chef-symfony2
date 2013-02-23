@@ -3,12 +3,12 @@ server {
   listen 80;
   server_name <%= @server_name %>;
 
-  access_log <%= node['nginx']['log_dir'] %>/<%= @server_name %>.access.log;
-  error_log <%= node['nginx']['log_dir'] %>/<%= @server_name %>.error.log;
+  access_log /etc/nginx/<%= @server_name %>.access.log;
+  error_log /etc/nginx/<%= @server_name %>.error.log;
 
   rewrite ^/app\.php/?(.*)$ /$1 permanent;
 
-  root <%= node['nginx']['sites_dir'] %>/<%= @document_root %>;
+  root /var/www/<%= @document_root %>;
 
   location / {
     index app.php;
